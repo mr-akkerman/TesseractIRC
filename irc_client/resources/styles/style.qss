@@ -1,0 +1,128 @@
+/* Main application styles */
+
+/* Common styles */
+QWidget {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 13px;
+    color: #333333;
+    background-color: #ffffff;
+}
+
+QMainWindow {
+    background-color: #f5f5f5;
+}
+
+/* App header */
+QLabel#headerLabel {
+    font-size: 16px;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #5E81AC;
+    padding: 10px;
+}
+
+/* Chat sidebar */
+QListView#chatListView {
+    background-color: #ECEFF4;
+    border: none;
+    border-right: 1px solid #D8DEE9;
+    outline: none;
+}
+
+QListView#chatListView::item {
+    padding: 10px;
+    border-bottom: 1px solid #E5E9F0;
+}
+
+QListView#chatListView::item:selected {
+    background-color: #D8DEE9;
+    color: #2E3440;
+}
+
+QListView#chatListView::item:hover {
+    background-color: #E5E9F0;
+}
+
+/* Chat styles */
+QListView#messageListView {
+    background-color: #ffffff;
+    border: none;
+    outline: none;
+}
+
+/* Message input */
+QTextEdit#messageInput {
+    border: 1px solid #D8DEE9;
+    border-radius: 4px;
+    padding: 8px;
+    background-color: #ffffff;
+}
+
+QPushButton#sendButton {
+    background-color: #5E81AC;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: bold;
+}
+
+QPushButton#sendButton:hover {
+    background-color: #81A1C1;
+}
+
+QPushButton#sendButton:pressed {
+    background-color: #4C6A96;
+}
+
+QPushButton#sendButton:disabled {
+    background-color: #D8DEE9;
+    color: #4C566A;
+}
+
+/* Dialog styles */
+QDialog {
+    background-color: #ffffff;
+}
+
+QLineEdit {
+    border: 1px solid #D8DEE9;
+    border-radius: 4px;
+    padding: 8px;
+    background-color: #ffffff;
+}
+
+QLineEdit:focus {
+    border: 1px solid #5E81AC;
+}
+
+QPushButton {
+    background-color: #5E81AC;
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 8px 16px;
+    min-width: 80px;
+}
+
+QPushButton:hover {
+    background-color: #81A1C1;
+}
+
+QPushButton:pressed {
+    background-color: #4C6A96;
+}
+
+QPushButton:disabled {
+    background-color: #D8DEE9;
+    color: #4C566A;
+}
+
+/* Notification styles */
+QLabel#notificationLabel {
+    background-color: #EBCB8B;
+    color: #2E3440;
+    border-radius: 4px;
+    padding: 8px;
+    font-weight: bold;
+} 
