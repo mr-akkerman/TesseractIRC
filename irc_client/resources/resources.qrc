@@ -1,0 +1,9 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>images/server-icon.png</file>
+        <file>images/channel-icon.png</file>
+        <file>images/user-icon.png</file>
+        <file>styles/style.qss</file>
+    </qresource>
+</RCC> 
