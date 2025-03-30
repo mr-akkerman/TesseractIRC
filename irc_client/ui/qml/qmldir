@@ -1,0 +1,7 @@
+module Main
+
+ChatListItem 1.0 ChatListItem.qml
+MessageItem 1.0 MessageItem.qml
+ConnectDialog 1.0 ConnectDialog.qml
+JoinDialog 1.0 JoinDialog.qml
+ErrorDialog 1.0 ErrorDialog.qml 
