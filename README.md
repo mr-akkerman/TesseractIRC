@@ -88,7 +88,7 @@ Installation steps:
 ```bash
 # Clone the repository
 git clone https://github.com/mr-akkerman/TesseractIRC.git
-cd tesseract-irc
+cd TesseractIRC
 
 # Install dependencies
 pip install -r requirements.txt
@@ -191,7 +191,7 @@ TesseractIRC построен с использованием технологи
 ```bash
 # Клонировать репозиторий
 git clone https://github.com/mr-akkerman/TesseractIRC.git
-cd tesseract-irc
+cd TesseractIRC
 
 # Установить зависимости
 pip install -r requirements.txt
