@@ -17,8 +17,7 @@ ApplicationWindow {
     minimumWidth: 800
     minimumHeight: 500
     
-    // Link to application controller - REMOVING NULL INITIALIZATION
-    // property var appController: null
+    // Application controller is supplied via context property
     property string activeServer: ""
     property string activeChannel: ""
     
