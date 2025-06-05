@@ -39,6 +39,7 @@ class DatabaseManager:
         
     def _create_tables(self):
         """Creates required database tables if they don't exist."""
+        conn = None
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -95,6 +96,7 @@ class DatabaseManager:
             
         Returns:
             True if successful, False otherwise
+        conn = None
         """
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -144,6 +146,7 @@ class DatabaseManager:
         Returns:
             True if successful, False otherwise
         """
+        conn = None
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -198,6 +201,7 @@ class DatabaseManager:
             List of server info dictionaries
         """
         servers = []
+        conn = None
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
@@ -237,6 +241,7 @@ class DatabaseManager:
             List of channel info dictionaries
         """
         channels = []
+        conn = None
         try:
             with sqlite3.connect(self.db_path) as conn:
                 conn.row_factory = sqlite3.Row
@@ -274,6 +279,7 @@ class DatabaseManager:
         Returns:
             True if successful, False otherwise
         """
+        conn = None
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -297,6 +303,7 @@ class DatabaseManager:
         Returns:
             True if successful, False otherwise
         """
+        conn = None
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -331,6 +338,7 @@ class DatabaseManager:
         Returns:
             True if successful, False otherwise
         """
+        conn = None
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
@@ -373,6 +381,7 @@ class DatabaseManager:
         Returns:
             Setting value or default_value if not found
         """
+        conn = None
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
