@@ -11,7 +11,7 @@ ApplicationWindow {
     width: 1024
     height: 768
     title: qsTr("TesseractIRC")
-    color: "#17212b"  // Dark backgroun
+    color: "#17212b"  // Dark background
     
     // Minimum window size
     minimumWidth: 800
