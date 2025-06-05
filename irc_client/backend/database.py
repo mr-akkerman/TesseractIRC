@@ -40,10 +40,10 @@ class DatabaseManager:
     def _create_tables(self):
         """Creates required database tables if they don't exist."""
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            
-            cursor.execute('''
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+
+                cursor.execute('''
             CREATE TABLE IF NOT EXISTS servers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 server_name TEXT NOT NULL UNIQUE,
@@ -55,7 +55,7 @@ class DatabaseManager:
             )
             ''')
             
-            cursor.execute('''
+                cursor.execute('''
             CREATE TABLE IF NOT EXISTS channels (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 server_id INTEGER NOT NULL,
@@ -67,21 +67,18 @@ class DatabaseManager:
             )
             ''')
             
-            cursor.execute('''
+                cursor.execute('''
             CREATE TABLE IF NOT EXISTS user_settings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 key TEXT NOT NULL UNIQUE,
                 value TEXT,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
-            ''')
-            
-            conn.commit()
+                ''')
+
+                conn.commit()
         except sqlite3.Error as e:
             logger.error(f"Error creating tables: {e}")
-        finally:
-            if conn:
-                conn.close()
                 
     def save_server(self, server_name: str, port: int = 6667, 
                    nickname: str = "PySideUser", username: str = "PySideUser", 
@@ -100,33 +97,39 @@ class DatabaseManager:
             True if successful, False otherwise
         """
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            
-            cursor.execute("SELECT id FROM servers WHERE server_name = ?", (server_name,))
-            result = cursor.fetchone()
-            
-            if result:
-                server_id = result[0]
-                cursor.execute('''
-                UPDATE servers 
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+
+                cursor.execute(
+                    "SELECT id FROM servers WHERE server_name = ?",
+                    (server_name,)
+                )
+                result = cursor.fetchone()
+
+                if result:
+                    server_id = result[0]
+                    cursor.execute(
+                        '''
+                UPDATE servers
                 SET port = ?, nickname = ?, username = ?, realname = ?, last_connected = CURRENT_TIMESTAMP
                 WHERE id = ?
-                ''', (port, nickname, username, realname, server_id))
-            else:
-                cursor.execute('''
+                ''',
+                        (port, nickname, username, realname, server_id),
+                    )
+                else:
+                    cursor.execute(
+                        '''
                 INSERT INTO servers (server_name, port, nickname, username, realname, last_connected)
                 VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-                ''', (server_name, port, nickname, username, realname))
-                
-            conn.commit()
-            return True
+                ''',
+                        (server_name, port, nickname, username, realname),
+                    )
+
+                conn.commit()
+                return True
         except sqlite3.Error as e:
             logger.error(f"Error saving server {server_name}: {e}")
             return False
-        finally:
-            if conn:
-                conn.close()
                 
     def save_channel(self, server_name: str, channel_name: str, is_private: bool = False, auto_join: bool = True) -> bool:
         """
@@ -142,42 +145,50 @@ class DatabaseManager:
             True if successful, False otherwise
         """
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            
-            cursor.execute("SELECT id FROM servers WHERE server_name = ?", (server_name,))
-            result = cursor.fetchone()
-            
-            if not result:
-                return False
-                
-            server_id = result[0]
-            
-            cursor.execute("SELECT id FROM channels WHERE server_id = ? AND channel_name = ?", 
-                         (server_id, channel_name))
-            result = cursor.fetchone()
-            
-            if result:
-                channel_id = result[0]
-                cursor.execute('''
-                UPDATE channels 
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+
+                cursor.execute(
+                    "SELECT id FROM servers WHERE server_name = ?",
+                    (server_name,),
+                )
+                result = cursor.fetchone()
+
+                if not result:
+                    return False
+
+                server_id = result[0]
+
+                cursor.execute(
+                    "SELECT id FROM channels WHERE server_id = ? AND channel_name = ?",
+                    (server_id, channel_name),
+                )
+                result = cursor.fetchone()
+
+                if result:
+                    channel_id = result[0]
+                    cursor.execute(
+                        '''
+                UPDATE channels
                 SET is_private = ?, auto_join = ?
                 WHERE id = ?
-                ''', (1 if is_private else 0, 1 if auto_join else 0, channel_id))
-            else:
-                cursor.execute('''
+                ''',
+                        (1 if is_private else 0, 1 if auto_join else 0, channel_id),
+                    )
+                else:
+                    cursor.execute(
+                        '''
                 INSERT INTO channels (server_id, channel_name, is_private, auto_join)
                 VALUES (?, ?, ?, ?)
-                ''', (server_id, channel_name, 1 if is_private else 0, 1 if auto_join else 0))
-                
-            conn.commit()
-            return True
+                ''',
+                        (server_id, channel_name, 1 if is_private else 0, 1 if auto_join else 0),
+                    )
+
+                conn.commit()
+                return True
         except sqlite3.Error as e:
             logger.error(f"Error saving channel {channel_name} for server {server_name}: {e}")
             return False
-        finally:
-            if conn:
-                conn.close()
                 
     def get_all_servers(self) -> List[Dict]:
         """
@@ -188,31 +199,30 @@ class DatabaseManager:
         """
         servers = []
         try:
-            conn = sqlite3.connect(self.db_path)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            
-            cursor.execute('''
+            with sqlite3.connect(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+
+                cursor.execute(
+                    '''
             SELECT id, server_name, port, nickname, username, realname, last_connected
             FROM servers
             ORDER BY last_connected DESC
-            ''')
-            
-            for row in cursor.fetchall():
-                servers.append({
-                    'id': row['id'],
-                    'server': row['server_name'],
-                    'port': row['port'],
-                    'nickname': row['nickname'],
-                    'username': row['username'],
-                    'realname': row['realname'],
-                    'last_connected': row['last_connected']
-                })
+            '''
+                )
+
+                for row in cursor.fetchall():
+                    servers.append({
+                        'id': row['id'],
+                        'server': row['server_name'],
+                        'port': row['port'],
+                        'nickname': row['nickname'],
+                        'username': row['username'],
+                        'realname': row['realname'],
+                        'last_connected': row['last_connected'],
+                    })
         except sqlite3.Error as e:
             logger.error(f"Error getting servers: {e}")
-        finally:
-            if conn:
-                conn.close()
                 
         return servers
         
@@ -228,29 +238,29 @@ class DatabaseManager:
         """
         channels = []
         try:
-            conn = sqlite3.connect(self.db_path)
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            
-            cursor.execute('''
+            with sqlite3.connect(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+
+                cursor.execute(
+                    '''
             SELECT c.id, c.channel_name, c.is_private, c.auto_join
             FROM channels c
             JOIN servers s ON c.server_id = s.id
             WHERE s.server_name = ?
-            ''', (server_name,))
-            
-            for row in cursor.fetchall():
-                channels.append({
-                    'id': row['id'],
-                    'name': row['channel_name'],
-                    'is_private': bool(row['is_private']),
-                    'auto_join': bool(row['auto_join'])
-                })
+            ''',
+                    (server_name,),
+                )
+
+                for row in cursor.fetchall():
+                    channels.append({
+                        'id': row['id'],
+                        'name': row['channel_name'],
+                        'is_private': bool(row['is_private']),
+                        'auto_join': bool(row['auto_join']),
+                    })
         except sqlite3.Error as e:
             logger.error(f"Error getting channels for server {server_name}: {e}")
-        finally:
-            if conn:
-                conn.close()
                 
         return channels
     
@@ -265,19 +275,16 @@ class DatabaseManager:
             True if successful, False otherwise
         """
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            
-            cursor.execute("DELETE FROM servers WHERE server_name = ?", (server_name,))
-            conn.commit()
-            
-            return cursor.rowcount > 0
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+
+                cursor.execute("DELETE FROM servers WHERE server_name = ?", (server_name,))
+                conn.commit()
+
+                return cursor.rowcount > 0
         except sqlite3.Error as e:
             logger.error(f"Error deleting server {server_name}: {e}")
             return False
-        finally:
-            if conn:
-                conn.close()
                 
     def delete_channel(self, server_name: str, channel_name: str) -> bool:
         """
@@ -291,28 +298,27 @@ class DatabaseManager:
             True if successful, False otherwise
         """
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            
-            cursor.execute("SELECT id FROM servers WHERE server_name = ?", (server_name,))
-            result = cursor.fetchone()
-            
-            if not result:
-                return False
-                
-            server_id = result[0]
-            
-            cursor.execute("DELETE FROM channels WHERE server_id = ? AND channel_name = ?", 
-                         (server_id, channel_name))
-            conn.commit()
-            
-            return cursor.rowcount > 0
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+
+                cursor.execute("SELECT id FROM servers WHERE server_name = ?", (server_name,))
+                result = cursor.fetchone()
+
+                if not result:
+                    return False
+
+                server_id = result[0]
+
+                cursor.execute(
+                    "DELETE FROM channels WHERE server_id = ? AND channel_name = ?",
+                    (server_id, channel_name),
+                )
+                conn.commit()
+
+                return cursor.rowcount > 0
         except sqlite3.Error as e:
             logger.error(f"Error deleting channel {channel_name} for server {server_name}: {e}")
             return False
-        finally:
-            if conn:
-                conn.close()
                 
     def save_user_setting(self, key: str, value: str) -> bool:
         """
@@ -326,32 +332,35 @@ class DatabaseManager:
             True if successful, False otherwise
         """
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            
-            cursor.execute("SELECT id FROM user_settings WHERE key = ?", (key,))
-            result = cursor.fetchone()
-            
-            if result:
-                cursor.execute('''
-                UPDATE user_settings 
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+
+                cursor.execute("SELECT id FROM user_settings WHERE key = ?", (key,))
+                result = cursor.fetchone()
+
+                if result:
+                    cursor.execute(
+                        '''
+                UPDATE user_settings
                 SET value = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE key = ?
-                ''', (value, key))
-            else:
-                cursor.execute('''
+                ''',
+                        (value, key),
+                    )
+                else:
+                    cursor.execute(
+                        '''
                 INSERT INTO user_settings (key, value)
                 VALUES (?, ?)
-                ''', (key, value))
-                
-            conn.commit()
-            return True
+                ''',
+                        (key, value),
+                    )
+
+                conn.commit()
+                return True
         except sqlite3.Error as e:
             logger.error(f"Error saving setting {key}: {e}")
             return False
-        finally:
-            if conn:
-                conn.close()
                 
     def get_user_setting(self, key: str, default_value: str = None) -> str:
         """
@@ -365,21 +374,18 @@ class DatabaseManager:
             Setting value or default_value if not found
         """
         try:
-            conn = sqlite3.connect(self.db_path)
-            cursor = conn.cursor()
-            
-            cursor.execute("SELECT value FROM user_settings WHERE key = ?", (key,))
-            result = cursor.fetchone()
-            
-            if result:
-                return result[0]
-            return default_value
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.cursor()
+
+                cursor.execute("SELECT value FROM user_settings WHERE key = ?", (key,))
+                result = cursor.fetchone()
+
+                if result:
+                    return result[0]
+                return default_value
         except sqlite3.Error as e:
             logger.error(f"Error getting setting {key}: {e}")
             return default_value
-        finally:
-            if conn:
-                conn.close()
                 
     def save_user_profile(self, nickname: str, username: str = None, realname: str = None) -> bool:
         """
